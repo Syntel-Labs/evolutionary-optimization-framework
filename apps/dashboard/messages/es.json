@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "Evolutionary Optimization Framework",
+    "tagline": "Optimizacion de rutas para flotas con multiples motores"
+  },
+  "nav": {
+    "home": "Inicio",
+    "instances": "Instancias",
+    "runs": "Corridas",
+    "compare": "Comparar"
+  },
+  "theme": {
+    "toggle": "Cambiar tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "locale": {
+    "switch": "Cambiar idioma",
+    "es": "Espanol",
+    "en": "Ingles"
+  }
+}
