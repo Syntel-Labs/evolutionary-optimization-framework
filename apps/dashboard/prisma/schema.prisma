@@ -1,0 +1,88 @@
+// Prisma schema for the VRP framework persistence layer.
+//
+// Conventions:
+// - Models in PascalCase, fields in camelCase.
+// - snake_case table names via @@map.
+// - All timestamps stored as UTC.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SolverEngine {
+  ILP
+  METAHEURISTIC
+  ORTOOLS
+}
+
+enum OptimizationObjective {
+  DISTANCE
+  TIME
+  FUEL
+  COST
+  VEHICLES
+}
+
+enum RunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model Instance {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  payload     Json
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  runs        Run[]
+
+  @@map("instances")
+}
+
+model Run {
+  id              String                @id @default(cuid())
+  instanceId      String                @map("instance_id")
+  engine          SolverEngine
+  objective       OptimizationObjective
+  status          RunStatus             @default(QUEUED)
+  timeLimitSec    Int?                  @map("time_limit_sec")
+  seed            Int?
+  engineParams    Json?                 @map("engine_params")
+  objectiveValue  Float?                @map("objective_value")
+  elapsedSeconds  Float?                @map("elapsed_seconds")
+  isOptimal       Boolean?              @map("is_optimal")
+  errorMessage    String?               @map("error_message")
+  startedAt       DateTime?             @map("started_at")
+  finishedAt      DateTime?             @map("finished_at")
+  createdAt       DateTime              @default(now()) @map("created_at")
+
+  instance        Instance              @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  routes          RouteResult[]
+
+  @@index([instanceId])
+  @@index([status])
+  @@map("runs")
+}
+
+model RouteResult {
+  id                    String   @id @default(cuid())
+  runId                 String   @map("run_id")
+  vehicleId             String   @map("vehicle_id")
+  stops                 Json
+  totalDistanceMeters   Float    @map("total_distance_meters")
+  totalDurationSeconds  Float    @map("total_duration_seconds")
+  totalLoad             Float    @map("total_load")
+
+  run                   Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@map("route_results")
+}

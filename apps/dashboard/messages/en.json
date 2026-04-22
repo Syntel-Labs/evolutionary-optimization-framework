@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "Evolutionary Optimization Framework",
+    "tagline": "Fleet routing optimization with pluggable engines"
+  },
+  "nav": {
+    "home": "Home",
+    "instances": "Instances",
+    "runs": "Runs",
+    "compare": "Compare"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "locale": {
+    "switch": "Switch language",
+    "es": "Spanish",
+    "en": "English"
+  }
+}
