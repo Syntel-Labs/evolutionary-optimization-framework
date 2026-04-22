@@ -3,16 +3,22 @@
 # Reads all ports, credentials and hosts from the root .env file.
 # No values are hardcoded: copy .env.example to .env before running.
 #
+# Host-visible names (project, containers, volumes, network) are
+# prefixed with COMPOSE_PROJECT_PREFIX so this stack does not clash
+# with other stacks on the same host. Internal DNS names (postgres,
+# engine, web) are kept short because they flow into DATABASE_URL,
+# NEXT_PUBLIC_ENGINE_URL and the FastAPI CORS config.
+#
 # Usage:
 #   cp .env.example .env
 #   docker compose up --build
 
-name: eof
+name: ${COMPOSE_PROJECT_PREFIX}
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: eof-postgres
+    container_name: ${COMPOSE_PROJECT_PREFIX}-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -22,6 +28,8 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - default
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -33,7 +41,7 @@ services:
       context: .
       dockerfile: docker/engine.Dockerfile
       target: dev
-    container_name: eof-engine
+    container_name: ${COMPOSE_PROJECT_PREFIX}-engine
     restart: unless-stopped
     depends_on:
       postgres:
@@ -49,6 +57,8 @@ services:
       - "${ENGINE_PORT}:8000"
     volumes:
       - ./engine:/app
+    networks:
+      - default
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 15s
@@ -60,7 +70,7 @@ services:
       context: .
       dockerfile: docker/web.Dockerfile
       target: dev
-    container_name: eof-web
+    container_name: ${COMPOSE_PROJECT_PREFIX}-web
     restart: unless-stopped
     depends_on:
       engine:
@@ -78,6 +88,13 @@ services:
       - ./packages/shared:/app/packages/shared
       - /app/node_modules
       - /app/apps/dashboard/node_modules
+    networks:
+      - default
+
+networks:
+  default:
+    name: ${COMPOSE_PROJECT_PREFIX}-net
 
 volumes:
   pgdata:
+    name: ${COMPOSE_PROJECT_PREFIX}-pgdata

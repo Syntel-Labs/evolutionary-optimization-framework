@@ -32,6 +32,25 @@ Servicios disponibles:
 - Health del motor: <http://localhost:8000/health>
 - PostgreSQL: `localhost:5432` (usuario y credenciales en `.env`)
 
+## Identidad del stack en docker
+
+Todo lo visible desde el host se prefija con el valor de `COMPOSE_PROJECT_PREFIX` (default `evopfr`). Esto permite distinguir este stack de otros que tengas corriendo.
+
+Ejemplo con prefijo default:
+
+| Recurso     | Nombre host-visible |
+| ----------- | ------------------- |
+| Proyecto    | `evopfr`            |
+| Contenedor  | `evopfr-web`        |
+| Contenedor  | `evopfr-engine`     |
+| Contenedor  | `evopfr-postgres`   |
+| Red         | `evopfr-net`        |
+| Volumen     | `evopfr-pgdata`     |
+
+Los nombres internos de servicio (`web`, `engine`, `postgres`) no llevan prefijo: son hostnames DNS que usan `DATABASE_URL`, `NEXT_PUBLIC_ENGINE_URL` y la config CORS del motor.
+
+Para correr varios stacks en paralelo, cambiar `COMPOSE_PROJECT_PREFIX` en `.env` (por ejemplo `evopfr-dev`, `evopfr-staging`) y asegurarse que los puertos expuestos no choquen (`WEB_PORT`, `ENGINE_PORT`, `POSTGRES_PORT`).
+
 ## Variables de entorno
 
 Reglas del proyecto:
