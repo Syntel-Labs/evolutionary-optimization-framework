@@ -1,0 +1,83 @@
+# Docker Compose for local development.
+#
+# Reads all ports, credentials and hosts from the root .env file.
+# No values are hardcoded: copy .env.example to .env before running.
+#
+# Usage:
+#   cp .env.example .env
+#   docker compose up --build
+
+name: eof
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: eof-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  engine:
+    build:
+      context: .
+      dockerfile: docker/engine.Dockerfile
+      target: dev
+    container_name: eof-engine
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ENGINE_PORT: ${ENGINE_PORT}
+      ENGINE_LOG_LEVEL: ${ENGINE_LOG_LEVEL}
+      ENGINE_CORS_ORIGINS: ${ENGINE_CORS_ORIGINS}
+      ENGINE_ILP_DEFAULT_TIME_LIMIT: ${ENGINE_ILP_DEFAULT_TIME_LIMIT}
+      ENGINE_GA_WORKERS: ${ENGINE_GA_WORKERS}
+      DATABASE_URL: ${DATABASE_URL}
+    ports:
+      - "${ENGINE_PORT}:8000"
+    volumes:
+      - ./engine:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      target: dev
+    container_name: eof-web
+    restart: unless-stopped
+    depends_on:
+      engine:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      WEB_PORT: ${WEB_PORT}
+      NEXT_PUBLIC_ENGINE_URL: ${NEXT_PUBLIC_ENGINE_URL}
+      NEXT_PUBLIC_DEFAULT_LOCALE: es
+      DATABASE_URL: ${DATABASE_URL}
+    ports:
+      - "${WEB_PORT}:3000"
+    volumes:
+      - ./apps/dashboard:/app/apps/dashboard
+      - ./packages/shared:/app/packages/shared
+      - /app/node_modules
+      - /app/apps/dashboard/node_modules
+
+volumes:
+  pgdata:

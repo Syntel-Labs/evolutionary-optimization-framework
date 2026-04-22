@@ -1,0 +1,42 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Node
+node_modules
+**/node_modules
+.next
+**/.next
+dist
+**/dist
+*.log
+
+# Python
+__pycache__
+**/__pycache__
+*.pyc
+.venv
+**/.venv
+.pytest_cache
+.ruff_cache
+.mypy_cache
+
+# Env files (they are injected via docker compose)
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.vscode
+.idea
+.DS_Store
+
+# Reference material (not part of the app)
+reference/
+
+# Misc
+*.md
+!README.md
+!engine/README.md
+!apps/dashboard/README.md
