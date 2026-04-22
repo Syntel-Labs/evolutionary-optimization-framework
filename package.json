@@ -1,0 +1,22 @@
+{
+  "name": "@syntel-labs/evolutionary-optimization-framework",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Framework modular de optimizacion VRP con ILP, metaheuristicas y OR-Tools",
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "scripts": {
+    "dev": "pnpm --filter @syntel-labs/dashboard dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
